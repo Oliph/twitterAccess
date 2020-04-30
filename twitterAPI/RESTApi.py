@@ -178,12 +178,12 @@ class TwitterRESTAPI:
             logger.error("create_call: resp from Twitter: {}".format(resp))
             time.sleep(5)
             logger.error("create_call: Ending Pause - Retry")
-            self.create_call(url)
+            return self.create_call(url)
         except requests.exceptions.ConnectionError as e:
             logger.error("create_call: error {} - Pause for 5 sec".format(e))
             time.sleep(5)
             logger.error("create_call: Ending Pause - Retry")
-            self.create_call(url)
+            return self.create_call(url)
 
         return self.check_response(resp)
 
