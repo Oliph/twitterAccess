@@ -7,5 +7,5 @@ setup(
     description="Collection of developed tools to access twitter API",
     author="Olivier Philippe",
     author_email="olivier.philippe@gmail.com",
-    packages=["twitterAccess"],
+    py_modules=["twitterAccess"],
 )
