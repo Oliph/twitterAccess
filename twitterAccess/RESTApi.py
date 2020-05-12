@@ -93,7 +93,7 @@ class TwitterRESTAPI:
             logger.critical("create_client: No Keys to connect, check the file")
             raise "No Keys to connect, check the file"
 
-    def cursor_call(self, limit):
+    def cursor_call(self, limit=None):
         """
         Used when a cursor methods is needed to parse results
         """
@@ -466,13 +466,14 @@ class TwitterRESTAPI:
         self.api_type = "search"
         self.service = "search/tweets.json"
         self.parameters = {"q": search_terms}
+        self.parameters["cursor"] = "-1"
         if max_id:
             self.last_max_id = int(max_id)  # FIXME Two variables for last_max_id
             self.parameters["max_id"] = int(max_id)
         if since_id:
             self.since_id = since_id  # FIXME two variables for since_id
             self.parameters["since_id"] = since_id
-        return self.cursor_call()
+        return self.cursor_call(limit=None)
 
     def search_30_dev(self):
 
