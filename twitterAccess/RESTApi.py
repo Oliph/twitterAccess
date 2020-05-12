@@ -18,13 +18,12 @@ from datetime import datetime
 import requests
 
 from requests import ConnectionError
-
 from requests_oauthlib import OAuth1
 
 # Logging
 from logger import logger as logger_perso
 
-logger = logger_perso(name="twitterRESTAPI", stream_level="INFO", file_level="ERROR")
+logger = logger_perso(name="twitterRESTAPI", stream_level="DEBUG", file_level="ERROR")
 
 
 # ### CONNECT ################################################
@@ -129,18 +128,28 @@ class TwitterRESTAPI:
         check = True
         while check is True:
             result = self.create_URL()
+            logger.debug(result)
+            logger.debug(result.response)
             # Return a list of tweet, need to get the last tweet
             # To have the latest tweet. The -1 to avoid redundancies
             try:
                 # Last return is an empty list because the last max_id match the last tweet
-                result.max_id = int(result.response[-1]["id"]) - 1
+                try:
+                    result.max_id = int(result.response[-1]["id"]) - 1
+                except KeyError:  # Seems to have the max_id stored in metadata
+                    result.max_id = int(result.response["search_metadata"]["max_id"])
                 self.last_max_id = result.max_id
                 self.parameters["max_id"] = result.max_id
                 # self.parameters['since_id'] = result.since_id
                 try:
                     result.since_id = self.since_id
                 except AttributeError:  # Mean that it is the first since id
-                    self.since_id = int(result.response[0]["id"])
+                    try:
+                        self.since_id = int(result.response[0]["id"])
+                    except KeyError:
+                        self.since_id = int(
+                            result.response["search_metadata"]["since_id"]
+                        )
                     result.since_id = self.since_id
             # Last return is an empty list because the last max_id match the last tweet
             # When try to collect response from a protected account
@@ -156,6 +165,12 @@ class TwitterRESTAPI:
                 except AttributeError:
                     result.since_id = None
                 check = False
+            # In case of search API, it is an empty list in response.statuses
+            try:
+                if len(result.response["statuses"]) == 0:
+                    check = False
+            except KeyError:  # If the key is not here it may be because it is not return by that type of API call
+                pass
             yield result
 
     # FIXME If it is a list that its passed like from user_look_up, it needs to be encored
@@ -169,6 +184,7 @@ class TwitterRESTAPI:
         # True as second element of urrlib is to encode a list
         self.params = urllib.urlencode(self.parameters, True)
         url = "{}{}{}".format(BEGIN, self.service, self.params)
+        logger.debug(url)
         return self.create_call(url)
 
     def create_call(self, url):
@@ -459,21 +475,25 @@ class TwitterRESTAPI:
         self.parameters = {"user_id": user, "cursor": "-1", "skip_status": 1}
         return self.cursor_call()
 
-    def search_tweets(self, search_terms: list(), since_id=None, max_id=None):
+    def search_tweets(
+        self, search_terms: list(), operator="or", since_id=None, max_id=None
+    ):
         """
         return a list of tweet object from the search_terms list
         """
         self.api_type = "search"
-        self.service = "search/tweets.json"
-        self.parameters = {"q": search_terms}
-        self.parameters["cursor"] = "-1"
+        self.service = "search/tweets.json?"
+        if operator.lower() == "or":
+            self.parameters = {"q": search_terms}
+        elif operator.lower() == "and":
+            self.parameters = {"q": " ".join(search_terms)}
         if max_id:
             self.last_max_id = int(max_id)  # FIXME Two variables for last_max_id
             self.parameters["max_id"] = int(max_id)
         if since_id:
             self.since_id = since_id  # FIXME two variables for since_id
             self.parameters["since_id"] = since_id
-        return self.cursor_call(limit=None)
+        return self.tweet_call()
 
     def search_30_dev(self):
 
