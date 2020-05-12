@@ -18,6 +18,7 @@ from datetime import datetime
 import requests
 
 from requests import ConnectionError
+
 from requests_oauthlib import OAuth1
 
 # Logging
@@ -456,6 +457,21 @@ class TwitterRESTAPI:
         self.api_type = "friends"
         self.service = "friends/list.json?"
         self.parameters = {"user_id": user, "cursor": "-1", "skip_status": 1}
+        return self.cursor_call()
+
+    def search_tweets(self, search_terms: list(), since_id=None, max_id=None):
+        """
+        return a list of tweet object from the search_terms list
+        """
+        self.api_type = "search"
+        self.service = "search/tweets.json"
+        self.parameters = {"q": search_terms}
+        if max_id:
+            self.last_max_id = int(max_id)  # FIXME Two variables for last_max_id
+            self.parameters["max_id"] = int(max_id)
+        if since_id:
+            self.since_id = since_id  # FIXME two variables for since_id
+            self.parameters["since_id"] = since_id
         return self.cursor_call()
 
     def search_30_dev(self):
