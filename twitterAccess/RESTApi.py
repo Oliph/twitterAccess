@@ -18,7 +18,6 @@ from datetime import datetime
 import requests
 
 from requests import ConnectionError
-
 from requests_oauthlib import OAuth1
 
 # Logging
@@ -56,8 +55,11 @@ class TwitterRESTAPI:
         access_token: str,
         access_token_secret: str,
         wait_on_pause: bool,
+        dev_env: str = None,
     ):
         """
+        wait_on_pause bool: to make the app pause on the error return or to return the error and continue
+        dev_en str: the name of the dev environment to use Dev API endpoint. Default=None
         """
         self.wait_on_pause = wait_on_pause
 
@@ -65,6 +67,7 @@ class TwitterRESTAPI:
             consumer_key, consumer_secret, access_token, access_token_secret
         )
         self.loop = asyncio.get_event_loop()
+        self.dev_env = dev_env
 
     def async_loop(f):
         def decorated(self, *args, **kwargs):
@@ -454,6 +457,11 @@ class TwitterRESTAPI:
         self.service = "friends/list.json?"
         self.parameters = {"user_id": user, "cursor": "-1", "skip_status": 1}
         return self.cursor_call()
+
+    def search_30_dev(self):
+
+        raise NotImplementedError
+        # https://api.twitter.com/1.1/tweets/search/30day/my_env_name.json
 
 
 def main():
