@@ -21,9 +21,11 @@ from requests import ConnectionError
 from requests_oauthlib import OAuth1
 
 # Logging
-from logger import logger as logger_perso
+import logging
 
-logger = logger_perso(name="twitterRESTAPI", stream_level="DEBUG", file_level="ERROR")
+logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
+logger = logging.getLogger(__name__)
+# logger = logger(name="twitterRESTAPI", stream_level="DEBUG", file_level="ERROR")
 
 
 # ### CONNECT ################################################
