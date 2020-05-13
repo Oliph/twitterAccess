@@ -171,7 +171,10 @@ class TwitterRESTAPI:
             try:
                 if len(result.response["statuses"]) == 0:
                     check = False
-            except KeyError:  # If the key is not here it may be because it is not return by that type of API call
+            except (
+                TypeError,
+                KeyError,
+            ):  # If the key is not here it may be because it is not return by that type of API call
                 pass
             yield result
 
