@@ -18,6 +18,7 @@ from datetime import datetime
 import requests
 
 from requests import ConnectionError
+
 from requests_oauthlib import OAuth1
 
 # Logging
@@ -25,7 +26,6 @@ import logging
 
 logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
 logger = logging.getLogger(__name__)
-# logger = logger(name="twitterRESTAPI", stream_level="DEBUG", file_level="ERROR")
 
 
 # ### CONNECT ################################################
@@ -137,9 +137,9 @@ class TwitterRESTAPI:
             try:
                 # Last return is an empty list because the last max_id match the last tweet
                 try:
-                    result.max_id = int(result.response[-1]["id"]) - 1
-                except KeyError:  # Seems to have the max_id stored in metadata
                     result.max_id = int(result.response["search_metadata"]["max_id"])
+                except KeyError:  # Seems to have the max_id stored in metadata
+                    result.max_id = int(result.response[-1]["id"]) - 1
                 self.last_max_id = result.max_id
                 self.parameters["max_id"] = result.max_id
                 # self.parameters['since_id'] = result.since_id
@@ -147,11 +147,11 @@ class TwitterRESTAPI:
                     result.since_id = self.since_id
                 except AttributeError:  # Mean that it is the first since id
                     try:
-                        self.since_id = int(result.response[0]["id"])
-                    except KeyError:
                         self.since_id = int(
                             result.response["search_metadata"]["since_id"]
                         )
+                    except KeyError:
+                        self.since_id = int(result.response[0]["id"])
                     result.since_id = self.since_id
             # Last return is an empty list because the last max_id match the last tweet
             # When try to collect response from a protected account
@@ -422,7 +422,7 @@ class TwitterRESTAPI:
     def user_timeline(self, user, since_id=None, max_id=None):
         """
         Use the since_id: greater than and max_id: lesser than
-        Use both id if they are passed so the applicat that use this API
+        Use both id if they are passed so the application that use this API
         needs to deal with since_id and max_id before to be sure that all
         wanted tweets are collected
         """
