@@ -481,7 +481,12 @@ class TwitterRESTAPI:
         return self.cursor_call()
 
     def search_tweets(
-        self, search_terms: list(), operator="or", since_id=None, max_id=None
+        self,
+        search_terms: list(),
+        operator="or",
+        since_id=None,
+        max_id=None,
+        until=None,
     ):
         """
         return a list of tweet object from the search_terms list
@@ -498,6 +503,8 @@ class TwitterRESTAPI:
         if since_id:
             self.since_id = since_id  # FIXME two variables for since_id
             self.parameters["since_id"] = since_id
+        if until:
+            self.parameters["until"] = str(until)
         return self.tweet_call()
 
     def search_30_dev(self):
