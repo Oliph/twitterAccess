@@ -18,7 +18,6 @@ from datetime import datetime
 import requests
 
 from requests import ConnectionError
-
 from requests_oauthlib import OAuth1
 
 # Logging
@@ -314,7 +313,9 @@ class TwitterRESTAPI:
             time_to_sleep = (reset - time.time()) + 2
             time_vis = datetime.fromtimestamp(reset)
             logger.info(
-                "pause_API {} seconds - starting at {}".format(time_to_sleep, time_vis)
+                "pause_API {} seconds for hitting the limit - starting at {}".format(
+                    time_to_sleep, time_vis
+                )
             )
 
         # FIXME Bug if the call is too soon, it pauses
