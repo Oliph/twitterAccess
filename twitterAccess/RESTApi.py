@@ -18,6 +18,7 @@ from datetime import datetime
 import requests
 
 from requests import ConnectionError
+
 from requests_oauthlib import OAuth1
 
 # Logging
@@ -356,7 +357,7 @@ class TwitterRESTAPI:
         self.parameters = {"resources": service}
         return self.create_URL()
 
-    def user_look_up(self, list_id):
+    def user_look_up(self, list_id, type_id=None):
         """
         Return a generator of 100 users objects
         """
@@ -369,7 +370,10 @@ class TwitterRESTAPI:
                 )
             )
         list_params = [str(elt) for elt in list_id]
-        self.parameters = {"user_id": list_params}
+        if type_id == "screen_name":
+            self.parameters = {"user_id": list_params}
+        else:
+            self.parameters = {"screen_name": list_params}
         list_user = self.create_URL()
         return TwitterResponse(
             list_user.status,
@@ -557,15 +561,26 @@ def main():
         access_token_secret,
         wait_on_pause=False,
     )
-    while True:
-        tweet_results = test_api.tweet("Oli_Ph")
-        for tweet in tweet_results:
-            print(tweet.status)
-            print(tweet.response)
-        followers_results = test_api.followers_list("Oli_Ph")
-        for follower in followers_results:
-            print(follower.status)
-            print(follower.response)
+    # while True:
+    #     followers_results = test_api.followers_list("Oli_Ph")
+    #     for follower in followers_results:
+    #         print(follower.status)
+    #         print(follower.response)
+    list_to_look_up = [
+        "lauraborras",
+        "josemariamazon",
+        "pedroquevedoit",
+        "aitor_esteban",
+        "nestorrego",
+        "oskarmatute",
+        "pabloiglesias",
+        "albert_rivera",
+        "herzogoff",
+        "santi_abascal",
+    ]
+    result = test_api.user_look_up(list_to_look_up, type_id="dasdsad")
+
+    print(result.status)
     # for result in tweet_results:
     #     try:
     #         logger.info(
