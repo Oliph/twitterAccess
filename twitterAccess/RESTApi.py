@@ -371,9 +371,9 @@ class TwitterRESTAPI:
             )
         list_params = [str(elt) for elt in list_id]
         if type_id == "screen_name":
-            self.parameters = {"user_id": list_params}
-        else:
             self.parameters = {"screen_name": list_params}
+        else:
+            self.parameters = {"user_id": list_params}
         list_user = self.create_URL()
         return TwitterResponse(
             list_user.status,
@@ -578,9 +578,9 @@ def main():
         "herzogoff",
         "santi_abascal",
     ]
-    result = test_api.user_look_up(list_to_look_up, type_id="dasdsad")
+    result = test_api.user_look_up(list_to_look_up)
 
-    print(result.status)
+    print(result.response)
     # for result in tweet_results:
     #     try:
     #         logger.info(
