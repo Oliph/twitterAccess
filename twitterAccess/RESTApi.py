@@ -130,43 +130,27 @@ class TwitterRESTAPI:
         check = True
         while check is True:
             result = self.create_URL()
-            logger.debug(result)
-            logger.debug(result.response)
+            # print(result.response["search_metadata"])
             # Return a list of tweet, need to get the last tweet
             # To have the latest tweet. The -1 to avoid redundancies
             try:
                 # Last return is an empty list because the last max_id match the last tweet
-                try:
-                    result.max_id = int(result.response["search_metadata"]["max_id"])
-                except KeyError:  # Seems to have the max_id stored in metadata
-                    result.max_id = int(result.response[-1]["id"]) - 1
-                self.last_max_id = result.max_id
+                # try:
+                result.max_id = (
+                    result.response["statuses"][-1]["id"] - 1
+                )  # Exclude the current id
                 self.parameters["max_id"] = result.max_id
-                # self.parameters['since_id'] = result.since_id
+            # When call the method for user time line it is a list of statuses and not a dict
+            except TypeError:
                 try:
-                    result.since_id = self.since_id
-                except AttributeError:  # Mean that it is the first since id
-                    try:
-                        self.since_id = int(
-                            result.response["search_metadata"]["since_id"]
-                        )
-                    except KeyError:
-                        self.since_id = int(result.response[0]["id"])
-                    result.since_id = self.since_id
-            # Last return is an empty list because the last max_id match the last tweet
-            # When try to collect response from a protected account
-            # return the str() "protected" and break here
-            # so just pass an go straight to the yield result
-            except (IndexError, TypeError):
-                try:
-                    result.max_id = self.last_max_id
-                except AttributeError:
-                    result.max_id = None
-                try:
-                    result.since_id = self.since_id
-                except AttributeError:
-                    result.since_id = None
-                check = False
+                    result.max_id = int(result.response[-1]["id"]) - 1
+                    self.parameters["max_id"] = result.max_id
+                # Last return is an empty list because the last max_id match the last tweet
+                # When try to collect response from a protected account
+                # return the str() "protected" and break here
+                # so just pass an go straight to the yield result
+                except IndexError:
+                    check = False
             # In case of search API, it is an empty list in response.statuses
             try:
                 if len(result.response["statuses"]) == 0:
@@ -503,13 +487,14 @@ class TwitterRESTAPI:
         elif operator.lower() == "and":
             self.parameters = {"q": " ".join(search_terms)}
         if max_id:
-            self.last_max_id = int(max_id)  # FIXME Two variables for last_max_id
+            # self.last_max_id = int(max_id)  # FIXME Two variables for last_max_id
             self.parameters["max_id"] = int(max_id)
         if since_id:
-            self.since_id = since_id  # FIXME two variables for since_id
+            # self.since_id = since_id  # FIXME two variables for since_id
             self.parameters["since_id"] = since_id
         if until:
             self.parameters["until"] = str(until)
+        self.parameters["count"] = 200
         return self.tweet_call()
 
     def search_30_dev(self):
