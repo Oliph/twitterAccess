@@ -136,21 +136,23 @@ class TwitterRESTAPI:
             try:
                 # Last return is an empty list because the last max_id match the last tweet
                 # try:
-                result.max_id = (
+                result.max_id = int(
                     result.response["statuses"][-1]["id"] - 1
                 )  # Exclude the current id
                 self.parameters["max_id"] = result.max_id
             # When call the method for user time line it is a list of statuses and not a dict
             except TypeError:
-                try:
-                    result.max_id = int(result.response[-1]["id"]) - 1
-                    self.parameters["max_id"] = result.max_id
-                # Last return is an empty list because the last max_id match the last tweet
-                # When try to collect response from a protected account
-                # return the str() "protected" and break here
-                # so just pass an go straight to the yield result
-                except IndexError:
-                    check = False
+                logger.error(result.response)
+                raise
+                # try:
+                #     result.max_id = int(result.response[-1]["id"]) - 1
+                #     self.parameters["max_id"] = result.max_id
+                # # Last return is an empty list because the last max_id match the last tweet
+                # # When try to collect response from a protected account
+                # # return the str() "protected" and break here
+                # # so just pass an go straight to the yield result
+                # except IndexError:
+                check = False
             # In case of search API, it is an empty list in response.statuses
             try:
                 if len(result.response["statuses"]) == 0:
@@ -160,6 +162,7 @@ class TwitterRESTAPI:
                 KeyError,
             ):  # If the key is not here it may be because it is not return by that type of API call
                 pass
+            logger.info("Max id: {}".format(self.parameters["max_id"]))
             yield result
 
     # FIXME If it is a list that its passed like from user_look_up, it needs to be encored
@@ -476,6 +479,7 @@ class TwitterRESTAPI:
         since_id=None,
         max_id=None,
         until=None,
+        count=200,
     ):
         """
         return a list of tweet object from the search_terms list
@@ -494,7 +498,7 @@ class TwitterRESTAPI:
             self.parameters["since_id"] = since_id
         if until:
             self.parameters["until"] = str(until)
-        self.parameters["count"] = 200
+        self.parameters["count"] = count
         return self.tweet_call()
 
     def search_30_dev(self):
